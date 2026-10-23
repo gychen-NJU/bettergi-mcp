@@ -1,0 +1,49 @@
+{
+  "name": "bettergi-mcp",
+  "version": "1.0.0",
+  "description": "MCP stdio server for BetterGI: drive daily automation, material farming, script groups and configs from an agent",
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "bettergi",
+    "genshin-impact",
+    "automation",
+    "dsh"
+  ],
+  "license": "MIT",
+  "author": "gychen-NJU",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gychen-NJU/bettergi-mcp.git"
+  },
+  "homepage": "https://github.com/gychen-NJU/bettergi-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/gychen-NJU/bettergi-mcp/issues"
+  },
+  "type": "module",
+  "main": "bettergi-mcp.mjs",
+  "bin": {
+    "bettergi-mcp": "./bettergi-mcp.mjs"
+  },
+  "files": [
+    "bettergi-mcp.mjs",
+    "run-gate.mjs",
+    "run-utf8.ps1",
+    "gate-check.ps1",
+    "selftest.mjs",
+    "test-*.mjs",
+    "test-skill-playbook.ps1",
+    "README.md",
+    "README.en.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node bettergi-mcp.mjs",
+    "check": "node --check bettergi-mcp.mjs",
+    "test": "node test-gate.mjs",
+    "selftest": "node selftest.mjs --quiet"
+  }
+}
