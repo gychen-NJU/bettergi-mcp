@@ -23,18 +23,22 @@ Zero third-party dependencies (Node ≥ 18), single-file server. Every real acti
 
 ## Requirements
 
-- Windows + Node.js ≥ 18
-- BetterGI installed (default `D:\software\BetterGI`, override with `BETTERGI_ROOT`)
-- The `bettergi-control` skill (`~/.agents/skills/bettergi-control/`, providing the 15 PowerShell scripts; override with `BETTERGI_SKILL_DIR`)
+- Windows + Node.js ≥ 18; scripts target **Windows PowerShell 5.1** (UTF-8 with BOM), also compatible with pwsh 7
+- BetterGI installed and run at least once (`User\config.json` exists; default `D:\software\BetterGI`, override with `BETTERGI_ROOT`)
+- The `bettergi-control` skill (`~/.agents/skills/bettergi-control/`, providing the 16 PowerShell scripts, 14 of which this MCP actually calls; override with `BETTERGI_SKILL_DIR`) — **required**; without it most tools fail with "script not found"
 - The game window must be visible and foreground at 16:9 ≥ 1920×1080; **there is no background mode**
+- **The screen must be unlocked and the process must run in an interactive session** (when locked or in Session 0 — SSH/service sessions — SendInput and screen capture are silently swallowed by the OS; the run gate hard-blocks both cases)
 
 ## Install
 
+You need to clone **two** repositories: this one (the MCP server) plus `bettergi-control` (the PowerShell skill scripts it calls).
+
 ```powershell
 git clone https://github.com/gychen-NJU/bettergi-mcp.git
+git clone https://github.com/gychen-NJU/bettergi-control.git "$HOME\.agents\skills\bettergi-control"
 ```
 
-No `npm install` needed (zero dependencies).
+No `npm install` needed (zero dependencies). After installing, run `node bettergi-mcp\selftest.mjs --quiet` to self-check (should be all green on a Windows machine with BetterGI; on a plain dev box the PowerShell cases failing with "script not found" is expected).
 
 ### Register in DSH
 
@@ -86,7 +90,7 @@ Restart DSH and the `mcp__bettergi__*` tools appear in sessions.
 
 - **Never reads/writes game memory or game files**; only drives BetterGI, its configs and logs.
 - Hard requirements: a running BetterGI instance swallows command-line arguments; config edits require quitting BetterGI first.
-- Action tools run a **run gate** (`run-gate.mjs`): BetterGI already running, window < 1080p, non-16:9, or minimized are blocked as "doomed runs"; pass `force:true` to override intentionally.
+- Action tools run a **run gate** (`run-gate.mjs`): locked screen, Session 0 (SSH/service session), BetterGI already running, window < 1080p, non-16:9, or minimized are blocked as "doomed runs"; pass `force:true` to override intentionally. Lock/session detection requires a recent `bettergi-control` (bgi-status.ps1 emitting the `session` field); with an older skill repo the check degrades to a soft warning.
 - Long tasks are always "start → poll": each tool call is capped at 50 seconds; use `bgi_watch` / `bgi_wait_milestone` to confirm completion.
 - Account risk depends on usage: the official terms list third-party software / simulated input as grounds for a ban. Use it discreetly.
 

@@ -21,13 +21,18 @@ import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, statSync, rmSync } from 'node:fs';
 import { tmpdir, homedir } from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { evaluateRunGate, statusForGate } from './run-gate.mjs';
 
 // ─────────────────────────── 常量与路径 ───────────────────────────
 const BGI_ROOT = process.env.BETTERGI_ROOT || 'D:\\software\\BetterGI';
 const SKILL_DIR =
   process.env.BETTERGI_SKILL_DIR || path.join(homedir(), '.agents', 'skills', 'bettergi-control', 'scripts');
-const HERE = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'));
+// 2026-11-19 修复：原来手工 `new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')`
+// 不做百分号解码——克隆到含空格或中文的目录（如 C:\Users\张三\…）时 pathname 是 %20/%E4%B8%AD…，
+// HERE/BOOTSTRAP/CACHE_DIR 全指向不存在的路径，所有工具报「找不到脚本」。fileURLToPath 才是正解
+// （同仓 selftest.mjs 一直用的就是它）。
+const HERE = path.dirname(fileURLToPath(import.meta.url));
 const BOOTSTRAP = path.join(HERE, 'run-utf8.ps1');
 const CACHE_DIR = path.join(HERE, 'cache');
 const CACHE_FILE = path.join(CACHE_DIR, 'repo.json');
