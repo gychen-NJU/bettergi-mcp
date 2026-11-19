@@ -3,10 +3,12 @@
 import { spawn } from 'node:child_process';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const BGI = 'D:\\software\\BetterGI';
+// 2026-11-19：与 bettergi-mcp.mjs 同步——路径一律 fileURLToPath（百分号解码），根目录尊重 BETTERGI_ROOT
+const BGI = process.env.BETTERGI_ROOT || 'D:\\software\\BetterGI';
 const CFG = path.join(BGI, 'User', 'config.json');
-const SERVER = path.join(path.dirname(new URL(import.meta.url).pathname.replace(/^\//, '')), 'bettergi-mcp.mjs');
+const SERVER = path.join(path.dirname(fileURLToPath(import.meta.url)), 'bettergi-mcp.mjs');
 
 const orig = JSON.parse(readFileSync(CFG, 'utf8').replace(/^\uFEFF/, ''));
 // 选**四层且无歧义**的惰性字段：miyousheDataConfig 是 farmingPlanConfig 的嵌套对象，其内 dailyEliteCap/dailyMobCap 各只出现一次

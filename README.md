@@ -23,18 +23,22 @@ BetterGI（更好的原神）的 **MCP stdio 服务器**：把「启动游戏、
 
 ## 环境要求
 
-- Windows + Node.js ≥ 18
-- 本机已安装 **BetterGI**（默认 `D:\software\BetterGI`，可用 `BETTERGI_ROOT` 覆盖）
-- `bettergi-control` 技能（`~/.agents/skills/bettergi-control/`，提供被复用的 15 个 PowerShell 脚本；可用 `BETTERGI_SKILL_DIR` 覆盖）
+- Windows + Node.js ≥ 18；脚本按 **Windows PowerShell 5.1** 编写（UTF-8 带 BOM），pwsh 7 亦兼容
+- 本机已安装 **BetterGI** 且至少完成过一次首跑（`User\config.json` 已生成；默认路径 `D:\software\BetterGI`，可用 `BETTERGI_ROOT` 覆盖）
+- `bettergi-control` 技能（`~/.agents/skills/bettergi-control/`，提供被复用的 16 个 PowerShell 脚本，本 MCP 实际调用其中 14 个；可用 `BETTERGI_SKILL_DIR` 覆盖）——**必装**，缺它则绝大多数工具直接报「找不到脚本」
 - 游戏需可见且前台、16:9 ≥ 1920×1080；**没有后台挂机**
+- **屏幕不能处于锁定状态，且必须在交互会话里跑**（锁屏 / Session 0 的 SSH·服务会话下，SendInput 与截图会被系统静默吞掉；运行闸门会直接阻断这两类情形）
 
 ## 安装
 
+需要 clone **两个**仓库：本仓（MCP 服务器）+ `bettergi-control`（被调用的 PowerShell 技能脚本）。
+
 ```powershell
 git clone https://github.com/gychen-NJU/bettergi-mcp.git
+git clone https://github.com/gychen-NJU/bettergi-control.git "$HOME\.agents\skills\bettergi-control"
 ```
 
-不需要 `npm install`（零依赖）。
+不需要 `npm install`（零依赖）。装完可跑 `node bettergi-mcp\selftest.mjs --quiet` 自检（在装了 BetterGI 的 Windows 上应全绿；纯开发机上 PowerShell 用例会报「找不到脚本」属预期）。
 
 ### 在 DSH 里注册
 
@@ -87,7 +91,7 @@ git clone https://github.com/gychen-NJU/bettergi-mcp.git
 
 - **不读写游戏内存、不改游戏文件**；只驱动 BetterGI 与它的配置/日志。
 - 硬要求：BetterGI 运行中时命令行参数会被单实例吃掉；改配置必须先退出 BetterGI。
-- 执行类工具内置 **运行闸门**（`run-gate.mjs`）：BetterGI 占用、窗口 <1080p、非 16:9、最小化等"注定白跑"的情况直接拦下；确需强行放行用 `force:true`。
+- 执行类工具内置 **运行闸门**（`run-gate.mjs`）：屏幕锁定、Session 0（SSH/服务会话）、BetterGI 占用、窗口 <1080p、非 16:9、最小化等"注定白跑"的情况直接拦下；确需强行放行用 `force:true`。锁屏/会话判定需要较新的 `bettergi-control`（bgi-status.ps1 输出 `session` 字段）；旧版技能仓拿不到该字段时降级为软警告。
 - 长任务一律「发起 → 轮询」：单次工具调用被夹在 50 秒内，跑完用 `bgi_watch` / `bgi_wait_milestone` 确认。
 - 账号风险由使用方式决定：官方条款把第三方软件 / 模拟操作列为封号理由之一，低调使用。
 
